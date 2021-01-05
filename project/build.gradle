@@ -24,7 +24,7 @@ android {
 
 
     compileSdkVersion 30
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '29.0.3'
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
@@ -91,7 +91,7 @@ dependencies {
     implementation 'com.github.Innovattic:range-seek-bar:v1.0.6'
 
     // Required -- JUnit 4 framework
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     // Optional -- Mockito framework
