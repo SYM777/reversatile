@@ -19,7 +19,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:layout_below="@+id/board"
-		android:background="@color/board_color"
+		android:background="@color/black"
 		android:focusable="false"
 		android:gravity="bottom"
 		android:orientation="vertical"

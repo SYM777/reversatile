@@ -6,6 +6,7 @@
 <color name="statustextcolor">#ffffff</color>
 <color name="black">#000000</color>
 <color name="white">#ffffff</color>
+<color name="orange">#ff8800</color>
 <color name="board_color_helpers_valid">#20FFFFFF</color>
 <color name="board_color_helpers_invalid">#20FF0000</color>
 <color name="board_color_selection_invalid">#40FF0000</color>
@@ -21,5 +22,14 @@
 <color name="EmptySquare">#00FF00</color>
 <color name="LastMoveMarker">#0000FF</color>
 <color name="debugging">#FFCCCC</color>
+
+<color name="good_color">#00BCD4</color>
+<color name="good_color_green">#00FF00</color>
+<color name="bad_color">#F44336</color>
+<color name="bad_color_light">#F08080</color>
+<color name="neitral_color">#808080</color>
+<color name="gray_dark_color">#303030</color>
+
+<color name="text_on_green">#00FFFF</color>
 
 </resources>

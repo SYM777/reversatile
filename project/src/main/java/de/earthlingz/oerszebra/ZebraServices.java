@@ -9,7 +9,7 @@ import de.earthlingz.oerszebra.parser.GameParser;
 import de.earthlingz.oerszebra.parser.ReversiWarsParser;
 import de.earthlingz.oerszebra.parser.ThorParser;
 
-class ZebraServices {
+public class ZebraServices {
     private static final Supplier<GameStateBoardModel> boardState = Suppliers.memoize(GameStateBoardModel::new);
     private static final Supplier<GameParser> gameParser = Suppliers.memoize(() -> new GameParser(new ReversiWarsParser(), new ThorParser()));
 

@@ -18,7 +18,7 @@
             android:allowBackup="true"
             android:extractNativeLibs="false"
             android:fullBackupContent="@xml/backup_descriptor"
-            android:icon="@drawable/icon"
+            android:icon="@drawable/icon2"
             android:label="@string/app_name"
             android:theme="@style/CustomActionBarTheme">
         <activity
@@ -61,13 +61,26 @@
                 android:name=".guessmove.GuessMoveActivity"
                 android:parentActivityName=".DroidZebra"
                 android:label="@string/guess_best_title"
-        >
+                android:screenOrientation="portrait">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="de.earthlingz.oerszebra.DroidZebra" />
 
         </activity>
+        <activity
+                android:name=".guessmove.DataBaseActivity"
+                android:parentActivityName=".guessmove.GuessMoveActivity"
+                android:screenOrientation="portrait" />
+        <activity
+            android:name=".DBgameSavedActivity"
+            android:parentActivityName=".DroidZebra"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SaveGameActivity"
+            android:parentActivityName=".DBgameSavedActivity"
+            android:screenOrientation="portrait" />
+
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
         <meta-data android:name="google_analytics_ssaid_collection_enabled" android:value="false" />
 

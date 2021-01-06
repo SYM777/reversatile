@@ -10,6 +10,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+import android.widget.Toast;
+
 
 public class GuessMoveModeManager extends AbstractBoardViewModel {
 
@@ -23,10 +29,16 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
     };
     private GuessMoveListener guessMoveListener;
 
-    GuessMoveModeManager(ZebraEngine engine, EngineConfig globalSettings) {
+    private Context context;
 
+    Cursor userCursor;
+    long userId=0;
+
+
+    public GuessMoveModeManager(ZebraEngine engine, EngineConfig globalSettings, Context context) {
         this.engine = engine;
         initConfigs(globalSettings);
+        this.context = context;
     }
 
     private void initConfigs(EngineConfig globalSettings) {
@@ -37,12 +49,13 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
     private static EngineConfig createGuesserConfig(EngineConfig gs) {
         return new EngineConfig(
                 GameSettingsConstants.FUNCTION_HUMAN_VS_HUMAN,
-                20, 22, 1, false, "",
+                8, 16, 1, false, "",   // 20   22
                 false,
                 true,
                 false,
                 1,
                 1,
+                0,
                 0
         );
     }
@@ -56,19 +69,46 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
                 false,
                 false,
                 gs.useBook,
-                1,
-                1,
+                2,  //1
+                1,  //1
+                0,
                 0
         );
     }
 
-    public void generate(int minIn, int max, GuessMoveListener guessMoveListener) {
+// 15.10.2019 SYM777:
+    public static class GlobalVars
+    {
+        public static String CandidateMovesForBoardView = "";   // список попыток (ходов) отгадать лучший ход в режиме GuessMove
+        public static boolean GuessMode = false;                // Флаг режима GuessMove
+        public static boolean GuessMoveActivityIsOn = false;    // Флаг активити GuessMove
+        public static int BackgroundColor = 0;                  // Индекс цвета фона
+
+        static int movesCount0 = 0;         // число ходов перед записью в БД
+        static String moveSequence0;        // последовательность ходов перед записью в БД
+        static int movesCount1 = 0;         // число ходов после чтения из БД (для воспроизведения)
+        public static String moveSequence1;        // последовательность ходов после чтения из БД (для воспроизведения)
+        public static boolean Restore = false;     // флаг необходимости воспроизведения (после выбора из списка)
+        static boolean GameFromBad = false; // флаг при повторной загрузке задания из БД (bad > 2 или hint > 2)
+
+        public static GameState gameStateGuess = new GameState(8);  // для обращения из других классов
+
+        static SQLiteDatabase db;
+    }
+
+
+
+    void generate(int minIn, int max, GuessMoveListener guessMoveListener, boolean Reload) {
         int min = Math.max(minIn, 4);
         this.guessMoveListener = guessMoveListener;
-        final int movesPlayed = random.nextInt(max - min) + min;
+        final int movesPlayed = random.nextInt(max + 1 - min) + min + 2;
+
+//        Log.d("SYM777_DEBUG =====>", "min = " + min + ", max = " + max + ", movesPlayed = " + movesPlayed);
+
         this.candidateMoves = new CandidateMove[0];
-        new GameGenerator(engine).generate(generatorConfig, guesserConfig, movesPlayed, gameState -> {
+        new GameGenerator(engine, context).generate(generatorConfig, guesserConfig, movesPlayed, gameState -> {
             GuessMoveModeManager.this.gameState = gameState;
+            GlobalVars.gameStateGuess = gameState;
             gameState.setGameStateListener(new GameStateListener() {
                 @Override
                 public void onBoard(GameState board) {
@@ -80,8 +120,11 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
             guessMoveListener.onGenerated(gameState.getSideToMove());
             listener.onBoardStateChanged();
 
-        });
-
+// 15.10.2019 SYM777: to prevent premature display of eval-values
+// CandidateMovesForBoardView - список попыток (ходов) отгадать лучший ход в режиме GuessMove
+// The error is that arrays CandidateMoves in GuessMoveModeManager and in BoardView are different
+            GlobalVars.CandidateMovesForBoardView = "";
+        }, Reload);
 
     }
 
@@ -101,42 +144,123 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
         }
     }
 
-    public void guess(Move move) {
+    void guess(Move move) {
+        String eval = "";
+
+        Utils mUtils = new Utils();
+
+//        Log.d(TAG, "move = " + move.getText());
+
         if (move == null) {
             guessMoveListener.onBadGuess();
             return;
         }
 
-        for (CandidateMove candidateMove : gameState.getCandidateMoves()) {
-            if (move.getMoveInt() == candidateMove.getMoveInt() && candidateMove.isBest) {
-                showAllMoves();
-                gameState.setGameStateListener(new GameStateListener() {
-                    @Override
-                    public void onBoard(GameState board) {
-                        candidateMoves = board.getCandidateMoves();
-                        listener.onBoardStateChanged();
-                        guessMoveListener.onSideToMoveChanged(board.getSideToMove());
-                    }
-                });
+        GlobalVars.moveSequence0 = gameState.getMoveSequenceAsString();
+        GlobalVars.movesCount0 = gameState.getDisksPlayed();
 
-                this.guessMoveListener.onCorrectGuess();
-                return;
+//        Toast.makeText(context, "d = " + gameState.getDisksPlayed() + " ... m0 = " + GlobalVars.movesCount0 + " ... m1 = " + GlobalVars.movesCount1, Toast.LENGTH_SHORT).show();
+
+// 15.10.2019 SYM777: ignore repeated clicking on the previously selected field
+/*        for (CandidateMove candidateMove : this.candidateMoves) {
+            if (!GlobalVars.CandidateMovesForBoardView.contains(move.getText())) {
+                GlobalVars.CandidateMovesForBoardView = GlobalVars.CandidateMovesForBoardView + " " + move.getText();
+            }
+
+            if (candidateMove.getMoveInt() == move.getMoveInt()) {
+                if (candidateMove.isBest) {
+                    GlobalVars.GuessMode = 0;
+                    showAllMoves();
+                    gameState.setGameStateListener(new GameStateListener() {
+                        @Override
+                        public void onBoard(GameState board) {
+                            candidateMoves = board.getCandidateMoves();
+                            listener.onBoardStateChanged();
+                            guessMoveListener.onSideToMoveChanged(board.getSideToMove());
+                        }
+                    });
+
+                    this.guessMoveListener.onCorrectGuess();
+                    mUtils.saveBD(context, 0, GlobalVars.movesCount0, GlobalVars.moveSequence0, 1, 0);
+                    return;
+                }
+                else return;
+            }
+        }*/
+
+// 15.10.2019 SYM777: processing the first pressing
+        for (CandidateMove candidateMove : gameState.getCandidateMoves()) {
+            if (!GlobalVars.CandidateMovesForBoardView.contains(move.getText())) {
+                GlobalVars.CandidateMovesForBoardView = GlobalVars.CandidateMovesForBoardView + " " + move.getText();
+            }
+
+            if (move.getMoveInt() == candidateMove.getMoveInt()) {
+                if (candidateMove.isBest) {
+                    GlobalVars.GuessMode = false;
+                    showAllMoves();
+                    gameState.setGameStateListener(new GameStateListener() {
+                        @Override
+                        public void onBoard(GameState board) {
+                            candidateMoves = board.getCandidateMoves();
+                            listener.onBoardStateChanged();
+                            guessMoveListener.onSideToMoveChanged(board.getSideToMove());
+                        }
+                    });
+
+                    guessMoveListener.onCorrectGuess();
+                    mUtils.saveBDguess(context, 0, GlobalVars.movesCount0, GlobalVars.moveSequence0, true, false, false, 0);
+                    guessMoveListener.onShowStats(GuessMoveModeManager.GlobalVars.moveSequence0);
+
+                    return;
+                } else {
+                    if (candidateMove.hasEval) eval = candidateMove.evalShort;
+                }
             }
         }
         showMove(move);
-
         guessMoveListener.onBadGuess();
+        if (eval.length() > 0) {
+            mUtils.saveBDguess(context, 0, GlobalVars.movesCount0, GlobalVars.moveSequence0, false, true, false, Integer.valueOf(eval));
+            guessMoveListener.onShowStats(GuessMoveModeManager.GlobalVars.moveSequence0);
+
+        }
+        else
+            Toast.makeText(context, "На " + move.getText() + " хода нет...", Toast.LENGTH_SHORT).show();
     }
 
     public void move(Move move) throws InvalidMove {
         this.engine.makeMove(gameState, move);
     }
 
-    public void redoMove() {
+
+    void hintGuess() {
+        GlobalVars.moveSequence0 = gameState.getMoveSequenceAsString();
+        GlobalVars.movesCount0 = gameState.getDisksPlayed();
+
+        GlobalVars.GuessMode = false;
+        showAllMoves();
+        gameState.setGameStateListener(new GameStateListener() {
+            @Override
+            public void onBoard(GameState board) {
+                candidateMoves = board.getCandidateMoves();
+                listener.onBoardStateChanged();
+                guessMoveListener.onSideToMoveChanged(board.getSideToMove());
+            }
+        });
+
+        guessMoveListener.onHintGuess();
+        Utils mUtils = new Utils();
+        mUtils.saveBDguess(context, 0, GuessMoveModeManager.GlobalVars.movesCount0, GuessMoveModeManager.GlobalVars.moveSequence0, false, false, true, 0);
+        guessMoveListener.onShowStats(GuessMoveModeManager.GlobalVars.moveSequence0);
+    }
+
+
+
+    void redoMove() {
         engine.redoMove(gameState);
     }
 
-    public void undoMove() {
+    void undoMove() {
         engine.undoMove(gameState);
     }
 
@@ -203,11 +327,16 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
     private void showMove(Move move) {
         for (CandidateMove candidateMove : this.candidateMoves) {
             if (candidateMove.getMoveInt() == move.getMoveInt()) {
+
+//                Log.d(TAG, "1 candidateMove.getMoveInt() = " + candidateMove.getMoveInt() + "move.getMoveInt() = " + move.getMoveInt());
+
                 return;
             }
         }
         for (CandidateMove candidateMove : this.gameState.getCandidateMoves()) {
             if (candidateMove.getMoveInt() == move.getMoveInt()) {
+
+//                Log.d(TAG, "2 candidateMove.getMoveInt() = " + candidateMove.getMoveInt() + "move.getMoveInt() = " + move.getMoveInt());
 
                 CandidateMove[] newCandidateMoves = Arrays.copyOf(candidateMoves, candidateMoves.length + 1);
                 newCandidateMoves[newCandidateMoves.length - 1] = candidateMove;
@@ -232,6 +361,10 @@ public class GuessMoveModeManager extends AbstractBoardViewModel {
         void onCorrectGuess();
 
         void onBadGuess();
+
+        void onHintGuess();
+
+        void onShowStats(String moveseq);
 
     }
 }

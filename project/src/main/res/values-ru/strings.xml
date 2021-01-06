@@ -2,6 +2,8 @@
 <resources>
     <string name="dialog_cancel">Отмена</string>
     <string name="menu_enter_moves">Ввести ходы</string>
+    <string name="menu_save_moves">Сохранить игру</string>
+    <string name="menu_load_moves">Загрузить игру</string>
     <string name="settings_engine_use_book_summary">Библиотека дебютов</string>
     <string name="settings_engine_use_book_title">Использовать библиотеку дебютов (book.bin)</string>
     <string name="gameover_choices_options">Изменить настройки</string>
@@ -14,7 +16,7 @@
     <string name="settings_engine_randomness_dialog_message">Разрешить программе делать неоптимальные ходы. Более разнообразная игра с ошибками как в игре с людьми.</string>
     <string name="settings_engine_randomness_summary">Разрешить неоптимальные ходы</string>
     <string name="settings_engine_randomness_title">Оптимизация</string>
-    <string name="spash_layout_message">Reversatile загружается&#8230;</string>
+    <string name="spash_layout_message">Reversatile+ загружается&#8230;</string>
     <string name="settings_engine_auto_make_moves_summary">Делать вынужденные ходы автоматически (без подтверждения)</string>
     <string name="settings_engine_auto_make_moves_title">Вынужденные ходы</string>
     <string name="settings_ui_display_last_move_summary">Отмечать последний сделанный ход на доске</string>
@@ -38,7 +40,7 @@
     <string name="setting_strength_preference_summary">Максимальная глубина поиска при анализе позиции. Определяет силу игры программы.</string>
     <string name="settings_strength_preference_title">Глубина поиска</string>
     <string name="settings_strength_dialog_title">Глубина поиска</string>
-    <string name="app_name">Reversatile</string>
+    <string name="app_name">R+</string>
 
     <string name="settings_engine_preferences">Настройки программы</string>
 
@@ -52,7 +54,15 @@
     <string name="menu_item_quit">Выход</string>
     <string name="menu_item_about">О программе</string>
     <string name="menu_item_settings">Настройки</string>
+    <string name="menu_item_showdb">Статистика</string>
     <string name="menu_item_hint">Подсказка</string>
+    <string name="menu_item_bd_no">Без фильтра</string>
+    <string name="menu_item_bd_session">Текущая сессия</string>
+    <string name="menu_item_bd_day">Сегодняшний день</string>
+    <string name="menu_item_bd_yesterday">Вчерашний день</string>
+    <string name="menu_item_bd_week">Неделя</string>
+    <string name="menu_item_bd_month">Месяц</string>
+    <string name="menu_item_bd_all">Все данные</string>
     <string name="gameover_title">Конец игры</string>
     <string name="dialog_quit_title">Вы уверены?</string>
     <string name="dialog_quit_button_quit">Выход</string>
@@ -83,5 +93,38 @@
     <string name="ask_analytics_deny">Запретить</string>
     <string name="ask_analytics_accept">Разрешить</string>
     <string name="ask.analytics.help">Для улучшения приложения нам нужна анонимная статистика использования и журналы ошибок. Пожалуйста, разрешите сбор и передачу этой статистики. Приложение использует Google Analytics для Firebase и Firebase Crashlytics. Идентификаторы устройств и идентификаторы рекламных объявлений не передаются. Вы можете изменить свой выбор в настройках.</string>
+
+    <string name="guess_hint_used">Попытка не будет засчитана</string>
+    <string name="settings_background_color_summary">Выбор цвета фона</string>
+    <string name="settings_background_color_title">Цвет фона</string>
+    <string name="settings_background_color_dialog_title">Выбор цвета фона</string>
+
+    <string name="title_db_id">Id</string>
+    <string name="title_db_date">Дата</string>
+    <string name="title_db_move">Ходов</string>
+    <string name="title_db_moveseq">Последовательность</string>
+    <string name="title_db_good">Верно</string>
+    <string name="title_db_bad">Неверно</string>
+    <string name="title_db_hint">Подск.</string>
+    <string name="title_db_black">Чёрные</string>
+    <string name="title_db_white">Белые</string>
+
+    <string name="button_save">Сохранить</string>
+    <string name="button_delete">Удалить</string>
+    <string name="button_edit">Изменить</string>
+
+    <string name="static_bplayer_text">Игрок чёрными:</string>
+    <string name="static_wplayer_text">Игрок белыми:</string>
+    <string name="static_notice_text">Комментарии:</string>
+    <string name="hint_name_text">Имя</string>
+    <string name="hint_notice_text">Текст</string>
+
+    <string name="static_session">Сессия:</string>
+    <string name="static_today">Сегодня:</string>
+    <string name="static_yesterday">Вчера:</string>
+    <string name="static_week">Неделя:</string>
+    <string name="static_month">Месяц:</string>
+    <string name="static_all">Всё время:</string>
+
 
 </resources>

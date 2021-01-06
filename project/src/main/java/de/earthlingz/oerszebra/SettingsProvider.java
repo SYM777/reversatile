@@ -8,6 +8,8 @@ public interface SettingsProvider {
 
     int getSettingFunction();
 
+    int getSettingBackgroundColor();
+
     boolean isSettingAutoMakeForcedMoves();
 
     int getSettingRandomness();

@@ -1,20 +1,46 @@
 package de.earthlingz.oerszebra.guessmove;
 
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import com.shurik.droidzebra.*;
+
+import java.util.LinkedList;
+
+import de.earthlingz.oerszebra.ZebraServices;
+import de.earthlingz.oerszebra.parser.GameParser;
+
+import de.earthlingz.oerszebra.guessmove.GuessMoveModeManager.*;
 
 public class GameGenerator {
     private ZebraEngine engine;
 
-    public GameGenerator(@NonNull ZebraEngine engine) {
+    private Context context;
+
+    public GameParser parser = ZebraServices.getGameParser();
+
+    public GameGenerator(@NonNull ZebraEngine engine, Context context) {
         this.engine = engine;
+        this.context = context;
     }
 
-    public void generate(EngineConfig generatorConfig, EngineConfig postConfig, int movesCount, OnGenerated listener) {
+    public void generate(EngineConfig generatorConfig, EngineConfig postConfig, int movesCount, OnGenerated listener, boolean Reload) {
 
+        if (Reload && (GlobalVars.movesCount1 != 0)) {
+//            Toast.makeText(context, "конфигурация восстановлена " + GlobalVars.moveSequence1 + " = " + GlobalVars.movesCount1, Toast.LENGTH_SHORT).show();
 
-        engine.newGame(generatorConfig, onGameStateReadyListener(postConfig, movesCount, listener));
+            final LinkedList<Move> moves = parser.makeMoveList(GlobalVars.moveSequence1);
+            engine.setInitialGameState(moves);
+            engine.newGame(postConfig, onGameStateReadyListener(postConfig, GlobalVars.movesCount1 + 4, listener));
+        }
+        else {
+//            Toast.makeText(context, "movesCount = " + movesCount, Toast.LENGTH_SHORT).show();
+//            Log.d("SYM777_DEBUG =====>", "movesCount = " + movesCount);
+
+            engine.newGame(generatorConfig, onGameStateReadyListener(postConfig, movesCount, listener));
+        }
     }
 
     private ZebraEngine.OnGameStateReadyListener onGameStateReadyListener(EngineConfig postConfig, int movesCountInput, OnGenerated listener) {
@@ -44,9 +70,11 @@ public class GameGenerator {
                     }
 
                     private void returnGeneratedGame() {
-                        engine.updateConfig(gameState, postConfig);
-                        gameState.setGameStateListener(null);
-                        listener.onGenerated(gameState);
+                            engine.updateConfig(gameState, postConfig);
+                            gameState.setGameStateListener(null);
+                            listener.onGenerated(gameState);
+
+//                            Log.i("returnGeneratedGame", "*** " + GlobalVars.moveSequence0 + " * " + gameState.getMoveSequenceAsString() + " ***");
                     }
 
                     @Override
@@ -60,8 +88,11 @@ public class GameGenerator {
                     @Override
                     public void onBoard(GameState state) {
                         int discCount = state.getBlackPlayer().getDiscCount() + state.getWhitePlayer().getDiscCount();
+//                        Log.i("BlackDisks = ", Integer.toString(state.getBlackPlayer().getDiscCount()));
+//                        Log.i("WhiteDisks = ", Integer.toString(state.getWhitePlayer().getDiscCount()));
                         if (discCount == movesCountInput){
-                            Log.i("disccount", String.valueOf(discCount));
+                            Log.i("final disccount", String.valueOf(discCount));
+                            Log.i("movesCountInput = ", String.valueOf(movesCountInput));
                             gameState.setGameStateListener(waitForSettle);
                         }
                     }

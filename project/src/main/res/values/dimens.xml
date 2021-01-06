@@ -1,0 +1,10 @@
+<resources>
+    <dimen name="title_smalltext">8sp</dimen>
+    <dimen name="title_text">10sp</dimen>
+    <dimen name="list_smallsmalltext">8sp</dimen>
+    <dimen name="list_smalltext">10sp</dimen>
+    <dimen name="list_text">15sp</dimen>
+    <dimen name="stats_smallsmalltext">9sp</dimen>
+    <dimen name="stats_smalltext">12sp</dimen>
+    <dimen name="stats_text">15sp</dimen>
+</resources>

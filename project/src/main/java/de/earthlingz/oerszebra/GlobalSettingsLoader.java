@@ -23,10 +23,12 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
 
     private final int DEFAULT_SETTING_RANDOMNESS;
     private final int DEFAULT_SETTING_FUNCTION;
+    private final int DEFAULT_SETTING_BACKGROUND_COLOR;
     public static final String DEFAULT_SETTING_SENDMAIL = "";
 
 
     public static final String
+            SETTINGS_KEY_BACKGROUND_COLOR = "settings_background_color",
             SETTINGS_KEY_FUNCTION = "settings_engine_function",
             SETTINGS_KEY_STRENGTH = "settings_engine_strength",
             SETTINGS_KEY_AUTO_MAKE_FORCED_MOVES = "settings_engine_auto_make_moves",
@@ -51,6 +53,7 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
 
 
     private int settingFunction;
+    private int settingBackgroundColor;
     private boolean settingAutoMakeForcedMoves;
     private int settingRandomness;
     private String settingForceOpening;
@@ -83,6 +86,7 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
 
         DEFAULT_SETTING_STRENGTH = context.getString(R.string.default_search_depth);
         settingFunction = DEFAULT_SETTING_FUNCTION = Integer.parseInt(context.getString(R.string.default_engine_function));
+        settingBackgroundColor = DEFAULT_SETTING_BACKGROUND_COLOR = Integer.parseInt(context.getString(R.string.default_background_color));
         settingAutoMakeForcedMoves = DEFAULT_SETTING_AUTO_MAKE_FORCED_MOVES = Boolean.parseBoolean(context.getString(R.string.default_auto_make_moves));
         settingRandomness = DEFAULT_SETTING_RANDOMNESS = Integer.parseInt(context.getString(R.string.default_randomness));
         settingForceOpening = DEFAULT_SETTING_FORCE_OPENING = context.getString(R.string.default_forced_opening);
@@ -100,7 +104,7 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
     }
 
     private boolean loadSettings() {
-        int settingsFunction, settingZebraDepth, settingZebraDepthExact, settingZebraDepthWLD;
+        int settingsFunction, settingsBackgroundColor, settingZebraDepth, settingZebraDepthExact, settingZebraDepthWLD;
         int settingRandomness;
         boolean settingAutoMakeForcedMoves;
         String settingZebraForceOpening;
@@ -111,6 +115,7 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
         SharedPreferences settings = context.getSharedPreferences(SHARED_PREFS_NAME, 0);
 
         settingsFunction = Integer.parseInt(settings.getString(SETTINGS_KEY_FUNCTION, String.format(Locale.getDefault(), "%d", DEFAULT_SETTING_FUNCTION)));
+        settingsBackgroundColor = Integer.parseInt(settings.getString(SETTINGS_KEY_BACKGROUND_COLOR, String.format(Locale.getDefault(), "%d", DEFAULT_SETTING_BACKGROUND_COLOR)));
         String[] strength = settings.getString(SETTINGS_KEY_STRENGTH, DEFAULT_SETTING_STRENGTH).split("\\|");
         settingZebraDepth = Integer.parseInt(strength[0]);
         settingZebraDepthExact = Integer.parseInt(strength[1]);
@@ -131,6 +136,7 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
 
         boolean bZebraSettingChanged = (
                 getSettingFunction() != settingsFunction
+                        || getSettingBackgroundColor() != settingsBackgroundColor
                         || this.getSettingZebraDepth() != settingZebraDepth
                         || this.getSettingZebraDepthExact() != settingZebraDepthExact
                         || this.getSettingZebraDepthWLD() != settingZebraDepthWLD
@@ -147,6 +153,7 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
         );
 
         settingFunction = settingsFunction;
+        settingBackgroundColor = settingsBackgroundColor;
         this.settingZebraDepth = settingZebraDepth;
         this.settingZebraDepthExact = settingZebraDepthExact;
         this.settingZebraDepthWLD = settingZebraDepthWLD;
@@ -210,6 +217,11 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
     @Override
     public int getSettingFunction() {
         return settingFunction;
+    }
+
+    @Override
+    public int getSettingBackgroundColor() {
+        return settingBackgroundColor;
     }
 
     @Override
@@ -311,7 +323,8 @@ public class GlobalSettingsLoader implements SharedPreferences.OnSharedPreferenc
                 settingUseBook,
                 settingSlack,
                 settingPerturbation,
-                computerMoveDelay);
+                computerMoveDelay,
+                settingBackgroundColor);
     }
 
 

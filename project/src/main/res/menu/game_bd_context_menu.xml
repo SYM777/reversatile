@@ -1,0 +1,15 @@
+<menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_month_off"
+        android:icon="@drawable/ic_date_range_white_24dp"
+        android:visible="false"
+        app:showAsAction="always"
+        android:title="@string/menu_item_bd_month"/>
+    <item
+        android:id="@+id/menu_month_on"
+        android:icon="@drawable/ic_date_range_gray_24dp"
+        android:visible="false"
+        app:showAsAction="always"
+        android:title="@string/menu_item_bd_month"/>
+</menu>

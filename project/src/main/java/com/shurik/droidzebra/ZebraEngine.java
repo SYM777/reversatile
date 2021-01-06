@@ -26,6 +26,9 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import android.util.Log;
 
 import static de.earthlingz.oerszebra.GameSettingsConstants.*;
 
@@ -473,7 +476,7 @@ public class ZebraEngine {
         computerMoveDelay = delay;
     }
 
-    private void setInitialGameState(LinkedList<Move> moves) {
+    public void setInitialGameState(LinkedList<Move> moves) {
         ZebraEngine.this.initialGameState = new GameState(BOARD_SIZE, moves);
     }
 

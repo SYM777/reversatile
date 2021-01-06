@@ -38,8 +38,13 @@ import android.view.View;
 import com.shurik.droidzebra.CandidateMove;
 import com.shurik.droidzebra.InvalidMove;
 import com.shurik.droidzebra.Move;
+
+import de.earthlingz.oerszebra.DroidZebra;
 import de.earthlingz.oerszebra.R;
+import de.earthlingz.oerszebra.guessmove.GuessMoveModeManager;
+
 import java.util.concurrent.atomic.AtomicBoolean;
+import android.util.Log;
 
 public class BoardView extends View implements BoardViewModel.BoardViewModelListener {
 
@@ -57,6 +62,8 @@ public class BoardView extends View implements BoardViewModel.BoardViewModelList
     private FontMetrics mFontMetrics = null;
     private Paint mPaintEvalText = null;
     private FontMetrics mEvalFontMetrics = null;
+    private Paint mPaintDisksPlayed = null;
+    private FontMetrics mDisksFontMetrics = null;
 
     private BitmapShader mShaderV = null;
     private BitmapShader mShaderH = null;
@@ -125,6 +132,7 @@ public class BoardView extends View implements BoardViewModel.BoardViewModelList
 
         mPaint = new Paint();
         mPaintEvalText = new Paint();
+        mPaintDisksPlayed = new Paint();
         mBoardRect = new RectF();
 
 
@@ -283,6 +291,23 @@ public class BoardView extends View implements BoardViewModel.BoardViewModelList
 
             canvas.drawRect(cellRT, mPaint);
         }
+
+// ======================================
+        if (!GuessMoveModeManager.GlobalVars.GuessMode) {
+            if (GuessMoveModeManager.GlobalVars.GuessMoveActivityIsOn) {
+                if (this.boardViewModel.getNextMove() != null) {
+                    Move nextMove = this.boardViewModel.getNextMove();
+                    mMoveSelection = nextMove;
+                    RectF cellRT = getCellRect(nextMove.getX(), nextMove.getY());
+                    mPaint.setColor(mColors.SelectionValid);
+
+                    canvas.drawRect(cellRT, mPaint);
+                }
+            }
+        }
+// ======================================
+
+
         if(boardViewModel == null) {
             return;
         }
@@ -297,26 +322,31 @@ public class BoardView extends View implements BoardViewModel.BoardViewModelList
             float lineLength = mSizeCell / 4;
             for (CandidateMove move : this.boardViewModel.getCandidateMoves()) {
                 RectF cr = getCellRect(move.getX(), move.getY());
-                if (move.hasEval && shouldDisplayEvals()) {
-                    if (move.isBest)
-                        mPaintEvalText.setColor(mColors.EvalsBest);
-                    else
-                        mPaintEvalText.setColor(mColors.Evals);
-                    canvas.drawText(move.evalShort, cr.centerX(), cr.centerY() - (mEvalFontMetrics.ascent + mEvalFontMetrics.descent) / 2, mPaintEvalText);
-                } else {
-                    float[] pts =
-                            {
-                                    cr.centerX() - lineLength / 2,
-                                    cr.centerY() - lineLength / 2,
-                                    cr.centerX() + lineLength / 2,
-                                    cr.centerY() + lineLength / 2,
-                                    cr.centerX() + lineLength / 2,
-                                    cr.centerY() - lineLength / 2,
-                                    cr.centerX() - lineLength / 2,
-                                    cr.centerY() + lineLength / 2,
-                            };
-                    mPaint.setColor(mColors.ValidMoveIndicator);
-                    canvas.drawLines(pts, 0, 8, mPaint);
+
+// 15.10.2019 SYM777: some addition to prevent premature display of eval-values
+// The error is that arrays CandidateMoves in GuessMoveModeManager and in BoardView are different
+                if ((!GuessMoveModeManager.GlobalVars.GuessMode) || ((GuessMoveModeManager.GlobalVars.GuessMode) && (GuessMoveModeManager.GlobalVars.CandidateMovesForBoardView.contains(move.getText())))) {
+                    if (move.hasEval && shouldDisplayEvals()) {
+                        if (move.isBest)
+                            mPaintEvalText.setColor(mColors.EvalsBest);
+                        else
+                            mPaintEvalText.setColor(mColors.Evals);
+                        canvas.drawText(move.evalShort, cr.centerX(), cr.centerY() - (mEvalFontMetrics.ascent + mEvalFontMetrics.descent) / 2, mPaintEvalText);
+                    } else {
+                        float[] pts =
+                                {
+                                        cr.centerX() - lineLength / 2,
+                                        cr.centerY() - lineLength / 2,
+                                        cr.centerX() + lineLength / 2,
+                                        cr.centerY() + lineLength / 2,
+                                        cr.centerX() + lineLength / 2,
+                                        cr.centerY() - lineLength / 2,
+                                        cr.centerX() - lineLength / 2,
+                                        cr.centerY() + lineLength / 2,
+                                };
+                        mPaint.setColor(mColors.ValidMoveIndicator);
+                        canvas.drawLines(pts, 0, 8, mPaint);
+                    }
                 }
             }
         }
@@ -328,6 +358,28 @@ public class BoardView extends View implements BoardViewModel.BoardViewModelList
             mPaint.setColor(mColors.LastMoveMarker);
             canvas.drawCircle(cellRT.left + mSizeCell / 10, cellRT.bottom - mSizeCell / 10, mSizeCell / 10, mPaint);
         }
+
+// ======================================
+        if (!GuessMoveModeManager.GlobalVars.GuessMode) {
+            if (GuessMoveModeManager.GlobalVars.GuessMoveActivityIsOn) {
+                if (this.boardViewModel.getLastMove() != null) {
+                    Move lm = this.boardViewModel.getLastMove();
+                    RectF cellRT = getCellRect(lm.getX(), lm.getY());
+                    mPaintDisksPlayed.setColor(getResources().getColor(R.color.neitral_color));
+                    canvas.drawText(Integer.toString(GuessMoveModeManager.GlobalVars.gameStateGuess.getDisksPlayed()), cellRT.centerX(), cellRT.centerY() - (mDisksFontMetrics.ascent + mDisksFontMetrics.descent) / 2, mPaintDisksPlayed);
+//                canvas.drawText(Integer.toString(this.animationDuration), cellRT.centerX(), cellRT.centerY() - (mDisksFontMetrics.ascent + mDisksFontMetrics.descent) / 2, mPaintDisksPlayed);
+                }
+            } else {
+                if (this.boardViewModel.getLastMove() != null) {
+                    Move lm = this.boardViewModel.getLastMove();
+                    RectF cellRT = getCellRect(lm.getX(), lm.getY());
+                    mPaintDisksPlayed.setColor(getResources().getColor(R.color.neitral_color));
+                    canvas.drawText(Integer.toString(DroidZebra.gameStateZebra.getDisksPlayed()), cellRT.centerX(), cellRT.centerY() - (mDisksFontMetrics.ascent + mDisksFontMetrics.descent) / 2, mPaintDisksPlayed);
+                }
+            }
+        }
+// ======================================
+
     }
 
     private void drawDiscs(Canvas canvas, BoardViewModel board_view) {
@@ -428,6 +480,17 @@ public class BoardView extends View implements BoardViewModel.BoardViewModelList
         mPaintEvalText.setTextSize(mSizeCell * 0.5f);
         mPaintEvalText.setStrokeWidth(lineWidth);
         mEvalFontMetrics = mPaintEvalText.getFontMetrics();
+
+        mPaintDisksPlayed.reset();
+        mPaintDisksPlayed.setStyle(Paint.Style.FILL);
+        font = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
+        mPaintDisksPlayed.setTypeface(font);
+        mPaintDisksPlayed.setAntiAlias(true);
+        mPaintDisksPlayed.setTextAlign(Paint.Align.CENTER);
+        mPaintDisksPlayed.setTextScaleX(1.0f);
+        mPaintDisksPlayed.setTextSize(mSizeCell * 0.4f);
+        mPaintDisksPlayed.setStrokeWidth(lineWidth);
+        mDisksFontMetrics = mPaintDisksPlayed.getFontMetrics();
 
         setMeasuredDimension((int) mSizeX, (int) mSizeY);
     }

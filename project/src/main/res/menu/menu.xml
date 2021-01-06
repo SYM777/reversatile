@@ -7,13 +7,11 @@
     <item
         android:id="@+id/menu_take_back"
         android:icon="@drawable/ic_undo_white_24dp"
-        android:title="@string/menu_item_undo"
-        app:showAsAction="ifRoom|withText" />
+        android:title="@string/menu_item_undo" />
     <item
         android:id="@+id/menu_take_redo"
         android:icon="@drawable/ic_redo_white_24dp"
-        android:title="@string/menu_item_redo"
-        app:showAsAction="ifRoom|withText" />
+        android:title="@string/menu_item_redo"/>
     <item
         android:id="@+id/menu_goto_beginning"
         android:icon="@drawable/ic_fast_rewind_white_24dp"
@@ -26,7 +24,7 @@
         android:id="@+id/menu_new_game"
         android:icon="@drawable/ic_play_arrow_white_24dp"
         android:title="@string/menu_item_new_game"
-        app:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom"
         tools:ignore="AppCompatResource" />
     <item
         android:id="@+id/menu_settings"
@@ -41,12 +39,21 @@
         android:icon="@drawable/ic_edit_white_24dp"
         android:title="@string/menu_enter_moves" />
     <item
+        android:id="@+id/menu_save_moves"
+        android:icon="@drawable/ic_save_white_24dp"
+        android:title="@string/menu_save_moves" />
+    <item
+        android:id="@+id/menu_load_moves"
+        android:icon="@drawable/ic_open_white_24dp"
+        android:title="@string/menu_load_moves" />
+    <item
         android:id="@+id/menu_mail"
         android:icon="@drawable/ic_email_white_24dp"
         android:title="@string/menu_item_mail" />
     <item
         android:id="@+id/menu_guess_move"
         android:icon="@drawable/ic_question_answer_white_24dp"
+        app:showAsAction="always"
         android:title="@string/menu_item_guess_move" />
     <item
         android:id="@+id/menu_quit"

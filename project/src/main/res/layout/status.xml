@@ -5,7 +5,7 @@
     android:id="@+id/layout_status"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/board_color"
+    android:background="@color/black"
     android:padding="8dp">
 
 
@@ -15,7 +15,7 @@
         android:layout_height="0dp"
 
         android:gravity="center"
-        android:text="Mid: 20 Exakt: 22 G/V: 0"
+        android:text="Mid: 20 Exact: 22 G/V: 0"
         app:autoSizeMaxTextSize="15sp"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="5sp"
@@ -31,11 +31,16 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
 
-
         android:gravity="end|center_vertical"
         android:maxLines="1"
         android:text="32"
-        android:textColor="@color/black"
+        android:textColor="@color/gray_dark_color"
+
+        android:shadowColor="@color/white"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="2"
+
         app:autoSizeMinTextSize="15sp"
         app:autoSizeMaxTextSize="80sp"
         app:autoSizeTextType="uniform"
@@ -108,7 +113,7 @@
         android:layout_height="48dp"
 
 
-        android:background="@color/board_color"
+        android:background="@color/black"
 
         android:contentDescription="@string/menu_item_first_move"
         android:onClick="undoAll"
@@ -123,7 +128,7 @@
         android:id="@+id/status_undo"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:background="@color/board_color"
+        android:background="@color/black"
         android:contentDescription="@string/menu_item_undo"
         android:onClick="undo"
 
@@ -138,7 +143,7 @@
         android:id="@+id/status_redo"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:background="@color/board_color"
+        android:background="@color/black"
         android:contentDescription="@string/menu_item_redo"
         android:onClick="redo"
 
@@ -151,7 +156,7 @@
         android:id="@+id/status_rotate"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:background="@color/board_color"
+        android:background="@color/black"
 
         android:contentDescription="@string/gameover_choices_rotate"
 

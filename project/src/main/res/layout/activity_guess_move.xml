@@ -2,11 +2,11 @@
 <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_frame"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/guess_move_main_frame"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" android:background="@color/board_color">
-
+        android:layout_height="fill_parent"
+        android:background="@color/black">
 
     <de.earthlingz.oerszebra.BoardView.BoardView
         android:id="@+id/guess_move_board"
@@ -14,95 +14,433 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:background="@color/board_color"
-
         android:visibility="visible" />
 
     <LinearLayout
+        android:id="@+id/guess_move_board_info_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/guess_move_board"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:orientation="vertical">
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:orientation="vertical"
+        android:background="@color/black">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/side_to_move_circle"
-
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_marginStart="4dp"
-                android:layout_marginLeft="4dp"
-                android:contentDescription="@string/menu_item_guess_move"
-                android:padding="16dp"
-                app:srcCompat="@drawable/black_circle" />
-
-            <TextView
-                android:id="@+id/guess_move_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_toEndOf="@id/side_to_move_circle"
-                android:layout_toRightOf="@id/side_to_move_circle"
-                android:text="@string/menu_item_guess_move"
-                android:textSize="24sp" />
-
-        </RelativeLayout>
-
-        <com.innovattic.rangeseekbar.RangeSeekBar
-            android:id="@+id/rangeSeekBar"
+        <TextView
+            android:id="@+id/guess_move_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/board_color"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
-            app:rsb_max="58"
-            app:rsb_initialMinThumbValue="20"
-            app:rsb_initialMaxThumbValue="40"
-            app:rsb_minRange="5"
-            />
+            android:shadowColor="@color/white"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="2"
+            android:text="@string/menu_item_guess_move"
+            android:gravity="center"
+            android:textSize="17sp"
+            android:padding="2dp"/>
 
         <LinearLayout
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="6" >
+
+                <TextView android:id="@+id/SText0" android:layout_width="90dp" android:layout_row="0" android:layout_column="1" />
+                <TextView
+                    android:id="@+id/DayStaticText"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:layout_gravity="center"
+                    android:text="*"
+                    android:textColor="@color/neitral_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/GoodStaticText"
+                    android:layout_row="1"
+                    android:layout_column="0"
+                    android:layout_gravity="end"
+                    android:text="Верно:"
+                    android:textColor="@color/good_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/GoodTextDay"
+                    android:layout_row="1"
+                    android:layout_column="1"
+                    android:layout_gravity="center"
+                    android:text="0"
+                    android:textColor="@color/good_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/BadStaticText"
+                    android:layout_row="2"
+                    android:layout_column="0"
+                    android:layout_gravity="end"
+                    android:text="Неверно:"
+                    android:textColor="@color/bad_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/BadTextDay"
+                    android:layout_row="2"
+                    android:layout_column="1"
+                    android:layout_gravity="center"
+                    android:text="0"
+                    android:textColor="@color/bad_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/HintStaticText"
+                    android:layout_row="3"
+                    android:layout_column="0"
+                    android:layout_gravity="end"
+                    android:text="Подсказ.:"
+                    android:textColor="@color/Evals"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/HintTextDay"
+                    android:layout_row="3"
+                    android:layout_column="1"
+                    android:layout_gravity="center"
+                    android:text="0"
+                    android:textColor="@color/Evals"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/SumStaticText"
+                    android:layout_row="4"
+                    android:layout_column="0"
+                    android:layout_gravity="end"
+                    android:text="&#931;"
+                    android:textColor="@color/neitral_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    android:textStyle="bold"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/SumTextDay"
+                    android:layout_row="4"
+                    android:layout_column="1"
+                    android:layout_gravity="center"
+                    android:text="0"
+                    android:textColor="@color/neitral_color"
+                    android:textSize="@dimen/stats_smalltext"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/StatsTextDay"
+                    android:layout_row="5"
+                    android:layout_column="1"
+                    android:layout_gravity="center"
+                    android:text="0 %"
+                    android:textColor="@color/neitral_color"
+                    android:textSize="@dimen/stats_text"
+                    tools:ignore="HardcodedText" />
+
+            </GridLayout>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/MoveStatsFrame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@color/neitral_color"
+                        android:padding="1dp"
+                        android:visibility="invisible">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@color/black"
+                        android:paddingBottom="2dp">
+                    <GridLayout
+                        android:id="@+id/MoveStats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:columnCount="6"
+                        android:rowCount="4"
+                        android:layout_gravity="center_vertical"
+                        android:visibility="invisible">
+
+                        <TextView android:id="@+id/Text0" android:layout_width="25dp" android:layout_row="0" android:layout_column="0" />
+                        <TextView android:id="@+id/Text1" android:layout_width="30dp" android:layout_row="0" android:layout_column="1" />
+                        <TextView android:id="@+id/Text2" android:layout_width="15dp" android:layout_row="0" android:layout_column="2" />
+                        <TextView android:id="@+id/Text3" android:layout_width="15dp" android:layout_row="0" android:layout_column="3" />
+                        <TextView android:id="@+id/Text4" android:layout_width="30dp" android:layout_row="0" android:layout_column="4" />
+                        <TextView android:id="@+id/Text5" android:layout_width="wrap_content" android:layout_row="0" android:layout_column="5" android:text="Всего:" tools:ignore="HardcodedText" android:visibility="invisible"/>
+
+                        <TextView
+                            android:id="@+id/IdStaticText"
+                            android:layout_row="0"
+                            android:layout_column="0"
+                            android:layout_gravity="center"
+                            android:text="Id"
+                            android:textColor="@color/neitral_color"
+                            android:textSize="@dimen/stats_smallsmalltext"
+                            tools:ignore="HardcodedText" />
+
+                        <TextView
+                            android:id="@+id/MoveStaticText"
+                            android:layout_row="0"
+                            android:layout_column="1"
+                            android:layout_columnSpan="4"
+                            android:layout_gravity="center"
+                            android:text="Текущая позиция:"
+                            android:textColor="@color/neitral_color"
+                            android:textSize="@dimen/stats_smallsmalltext"
+                            tools:ignore="HardcodedText" />
+
+                        <TextView
+                            android:id="@+id/SumMoveStaticText"
+                            android:layout_row="0"
+                            android:layout_column="5"
+                            android:layout_gravity="center"
+                            android:text="&#931;"
+                            android:textColor="@color/neitral_color"
+                            android:textSize="@dimen/stats_smallsmalltext"
+                            tools:ignore="HardcodedText" />
+
+                        <TextView
+                            android:id="@+id/IdTextMove"
+                            android:layout_row="1"
+                            android:layout_column="0"
+                            android:text="0"
+                            android:textColor="@color/neitral_color"
+                            android:textSize="@dimen/stats_smallsmalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/GoodTextMove"
+                            android:layout_row="1"
+                            android:layout_column="1"
+                            android:text="0"
+                            android:textColor="@color/good_color"
+                            android:textSize="@dimen/stats_smalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/BadTextMove"
+                            android:layout_row="1"
+                            android:layout_column="2"
+                            android:layout_columnSpan="2"
+                            android:text="0"
+                            android:textColor="@color/bad_color"
+                            android:textSize="@dimen/stats_smalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/HintTextMove"
+                            android:layout_row="1"
+                            android:layout_column="4"
+                            android:text="0"
+                            android:textColor="@color/Evals"
+                            android:textSize="@dimen/stats_smalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/StatsTextMove"
+                            android:layout_row="1"
+                            android:layout_column="5"
+                            android:text="0 %"
+                            android:textColor="@color/neitral_color"
+                            android:textSize="@dimen/stats_smalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/EvalAvgTextMove"
+                            android:layout_row="2"
+                            android:layout_column="1"
+                            android:layout_columnSpan="2"
+                            android:text="0"
+                            android:paddingStart="10dp"
+                            android:textColor="@color/bad_color_light"
+                            android:textSize="@dimen/stats_smalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+                        <TextView
+                            android:id="@+id/EvalMinTextMove"
+                            android:layout_row="2"
+                            android:layout_column="3"
+                            android:layout_columnSpan="2"
+                            android:text="0"
+                            android:paddingEnd="10dp"
+                            android:textColor="@color/bad_color_light"
+                            android:textSize="@dimen/stats_smalltext"
+                            tools:ignore="HardcodedText"
+                            android:layout_gravity="center" />
+
+                    </GridLayout>
+                    </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/side_to_move_circle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/border"
+                        android:contentDescription="@string/menu_item_guess_move"
+                        android:padding="2dp"
+                        app:srcCompat="@drawable/black_circle"
+                        android:layout_gravity="center_vertical"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/rangeseeklayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="true"
+                    android:orientation="horizontal"
+                    android:paddingTop="5dp">
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp">
+
+                        <com.innovattic.rangeseekbar.RangeSeekBar
+                            android:id="@+id/rangeSeekBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:rsb_initialMaxThumbValue="8"
+                            app:rsb_initialMinThumbValue="4"
+                            app:rsb_max="58"
+                            app:rsb_minRange="4" />
+
+                        <TextView
+                            android:id="@+id/minText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/rangeSeekBar"
+                            android:layout_alignStart="@id/rangeSeekBar"
+                            android:text="4"
+                            android:textSize="12sp"
+                            tools:ignore="HardcodedText" />
+
+                        <TextView
+                            android:id="@+id/maxText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/rangeSeekBar"
+                            android:layout_alignEnd="@id/rangeSeekBar"
+                            android:text="8"
+                            android:textSize="12sp"
+                            tools:ignore="HardcodedText" />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/minText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="20"
-                tools:ignore="HardcodedText" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/maxText"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/guessUnDoButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:text="40"
-                tools:ignore="HardcodedText" />
+                android:contentDescription="@string/menu_item_undo"
+                android:onClick="UnDoMove"
+                app:srcCompat="@drawable/ic_undo_white_24dp"
+                android:background="@color/black"/>
+
+            <ImageButton
+                android:id="@+id/guessReDoButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/menu_item_redo"
+                android:onClick="ReDoMove"
+                app:srcCompat="@drawable/ic_redo_white_24dp"
+                android:background="@color/black"/>
+
+            <ImageButton
+                android:id="@+id/guessHintButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/menu_item_hint"
+                android:onClick="ShowHint"
+                app:srcCompat="@drawable/ic_wb_incandescent_white_24dp"
+                android:background="@color/black"/>
+
+            <ImageButton
+                android:id="@+id/guessShowDBButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/menu_item_showdb"
+                android:onClick="ShowDB"
+                app:srcCompat="@drawable/ic_view_list_white_24dp"
+                android:background="@color/black"/>
+
+            <ImageButton
+                android:id="@+id/guessNewButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="2"
+                android:contentDescription="@string/menu_item_new_game"
+                android:onClick="newGuessGame"
+                app:srcCompat="@drawable/ic_play_arrow_white_24dp"
+                android:background="@color/black"/>
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/guess_move_new"
-            android:layout_width="182dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|top"
-            android:background="@color/black"
-            android:text="@string/menu_item_new_game" />
-
     </LinearLayout>
-
-
 </RelativeLayout>

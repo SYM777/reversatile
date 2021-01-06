@@ -21,9 +21,11 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,11 +37,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
-
+import android.widget.FrameLayout;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
@@ -61,8 +65,13 @@ import javax.annotation.Nonnull;
 import de.earthlingz.oerszebra.BoardView.BoardView;
 import de.earthlingz.oerszebra.BoardView.GameStateBoardModel;
 import de.earthlingz.oerszebra.guessmove.GuessMoveActivity;
+import de.earthlingz.oerszebra.guessmove.GuessMoveModeManager;
+import de.earthlingz.oerszebra.guessmove.Utils;
 import de.earthlingz.oerszebra.parser.GameParser;
 
+import static de.earthlingz.oerszebra.GameSettingsConstants.BACKGROUND_COLOR_BLACK;
+import static de.earthlingz.oerszebra.GameSettingsConstants.BACKGROUND_COLOR_GREEN;
+import static de.earthlingz.oerszebra.GameSettingsConstants.BACKGROUND_COLOR_ORANGE;
 import static de.earthlingz.oerszebra.GameSettingsConstants.FUNCTION_HUMAN_VS_HUMAN;
 import static de.earthlingz.oerszebra.GameSettingsConstants.FUNCTION_ZEBRA_BLACK;
 import static de.earthlingz.oerszebra.GameSettingsConstants.FUNCTION_ZEBRA_VS_ZEBRA;
@@ -73,6 +82,7 @@ import static de.earthlingz.oerszebra.GlobalSettingsLoader.SETTINGS_KEY_FUNCTION
 import static de.earthlingz.oerszebra.GlobalSettingsLoader.SETTINGS_KEY_SENDMAIL;
 import static de.earthlingz.oerszebra.GlobalSettingsLoader.SHARED_PREFS_NAME;
 
+import android.util.Log;
 
 public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
         OnSettingsChangedListener, BoardView.OnMakeMoveListener, GameStateListener, ZebraEngine.OnEngineErrorListener {
@@ -94,8 +104,12 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
     public SettingsProvider settingsProvider;
     private GameStateListener handler = new GameStateHandlerProxy(this);
     private GameState gameState;
+    public static GameState gameStateZebra;     // для использования в других классах
     private EngineConfig engineConfig;
     private Menu menu;
+
+// 16.10.2019 SYM777:
+    public int DroidZebraActivityIsOn = 0;
 
 
     public void resetStatusView() {
@@ -123,6 +137,7 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
             @Override
             public void onGameStateReady(GameState gameState) {
                 DroidZebra.this.gameState = gameState;
+                gameStateZebra = gameState; // для передачи в BoardView/Draw
                 gameState.setGameStateListener(handler);
             }
         });
@@ -192,6 +207,14 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
             break;
             case R.id.menu_enter_moves: {
                 enterMoves();
+            }
+            break;
+            case R.id.menu_save_moves: {
+                saveMoves();
+            }
+            break;
+            case R.id.menu_load_moves: {
+                loadMoves();
             }
             break;
             case R.id.menu_mail: {
@@ -268,6 +291,8 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
         Analytics.setApp(this);
         Analytics.build();
 
+        DroidZebraActivityIsOn = 1;
+
         clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
         setContentView(R.layout.spash_layout);
@@ -317,11 +342,12 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
     }
 
     private void startNewGameAndResetUI(LinkedList<Move> moves) {
-        Analytics.log("new_game", new GameState(8, moves).getMoveSequenceAsString());
+        Analytics.log("new_game1", new GameState(8, moves).getMoveSequenceAsString());
         engine.newGame(moves, engineConfig, new ZebraEngine.OnGameStateReadyListener() {
             @Override
             public void onGameStateReady(GameState gameState1) {
                 DroidZebra.this.gameState = gameState1;
+                gameStateZebra = gameState1;
                 gameState1.setGameStateListener(handler);
 
                 resetAndLoadOnGuiThread();
@@ -334,7 +360,7 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
     }
 
     private void startNewGameAndResetUI(int moves_played_count, byte[] moves_played) {
-        Analytics.log("new_game", new GameState(8, moves_played, moves_played_count).getMoveSequenceAsString());
+        Analytics.log("new_game2", new GameState(8, moves_played, moves_played_count).getMoveSequenceAsString());
         engine.newGame(moves_played, moves_played_count, engineConfig, new ZebraEngine.OnGameStateReadyListener() {
             @Override
             public void onGameStateReady(GameState gameState1) {
@@ -353,6 +379,9 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
             getState().reset();
             resetStatusView();
             loadUISettings();
+
+            changeBackgroundColor();
+
         });
     }
 
@@ -524,6 +553,9 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
 
     @Override
     protected void onDestroy() {
+
+        DroidZebraActivityIsOn = 0;
+
         if(gameState != null) {
             engine.disconnect(gameState);
             gameState.removeGameStateListener();
@@ -557,6 +589,22 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
         DialogFragment newFragment = EnterMovesDialog.newInstance(clipboard);
         showDialog(newFragment, "dialog_moves");
     }
+
+    private void saveMoves() {
+        Utils mUtils = new Utils();
+        Long id = mUtils.saveBDgame(this, gameState.getMoveSequenceAsString(), gameState.getBlackPlayer().getDiscCount(), gameState.getWhitePlayer().getDiscCount());
+
+        Intent intent = new Intent(getApplicationContext(), SaveGameActivity.class);
+        intent.putExtra("id", id);
+        intent.putExtra("new", true);
+        startActivity(intent);
+    }
+
+    private void loadMoves(){
+        Intent intent = new Intent(this, DBgameSavedActivity.class);
+        startActivity(intent);
+    }
+
 
     public void consumeMovesString(String s) {
         final LinkedList<Move> moves = parser.makeMoveList(s);
@@ -611,6 +659,16 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
     protected void onResume() {
         super.onResume();
         mActivityActive = true;
+
+        if (GuessMoveModeManager.GlobalVars.Restore) {
+            GuessMoveModeManager.GlobalVars.Restore = false;
+
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+//            ClipData clip = ClipData.newPlainText()
+            clipboard.setText(GuessMoveModeManager.GlobalVars.moveSequence1);
+
+            enterMoves();
+        }
     }
 
     @Override
@@ -639,10 +697,88 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
         return state;
     }
 
+// 16.10.2019 SYM777:
+    private void changeBackgroundColor() {
+
+//        Log.d("SYM777_DEBUG:", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SettingBackgroundColor (changeBackgroundColor) = " + settingsProvider.getSettingBackgroundColor());
+
+        ActionBar actionBar = getSupportActionBar();
+
+/*        if (GuessMoveModeManager.GlobalVars.GuessMoveActivityIsOn) {
+            Log.d("SYM777_DEBUG:", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> GuessMoveActivityIsOn (changeBackgroundColor) = " + GuessMoveModeManager.GlobalVars.GuessMoveActivityIsOn);
+        }*/
+
+        if (settingsProvider.getSettingBackgroundColor() == BACKGROUND_COLOR_BLACK) {
+            GuessMoveModeManager.GlobalVars.BackgroundColor = 1;
+            if (DroidZebraActivityIsOn == 1) {
+                if (actionBar != null) {
+                    actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.black)));
+                }
+                FrameLayout fl = findViewById(R.id.board_info_layout);
+                fl.setBackgroundColor(getResources().getColor(R.color.black));
+                ConstraintLayout cl = findViewById(R.id.layout_status);
+                cl.setBackgroundColor(getResources().getColor(R.color.black));
+                ImageButton ib1 = findViewById(R.id.status_first_move);
+                ib1.setBackgroundColor(getResources().getColor(R.color.black));
+                ImageButton ib2 = findViewById(R.id.status_undo);
+                ib2.setBackgroundColor(getResources().getColor(R.color.black));
+                ImageButton ib3 = findViewById(R.id.status_redo);
+                ib3.setBackgroundColor(getResources().getColor(R.color.black));
+                ImageButton ib4 = findViewById(R.id.status_rotate);
+                ib4.setBackgroundColor(getResources().getColor(R.color.black));
+            }
+        }
+        if (settingsProvider.getSettingBackgroundColor() == BACKGROUND_COLOR_GREEN) {
+            GuessMoveModeManager.GlobalVars.BackgroundColor = 0;
+            if (DroidZebraActivityIsOn == 1) {
+                if (actionBar != null) {
+                    actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.board_color)));
+                }
+                FrameLayout fl = findViewById(R.id.board_info_layout);
+                fl.setBackgroundColor(getResources().getColor(R.color.board_color));
+                ConstraintLayout cl = findViewById(R.id.layout_status);
+                cl.setBackgroundColor(getResources().getColor(R.color.board_color));
+                ImageButton ib1 = findViewById(R.id.status_first_move);
+                ib1.setBackgroundColor(getResources().getColor(R.color.board_color));
+                ImageButton ib2 = findViewById(R.id.status_undo);
+                ib2.setBackgroundColor(getResources().getColor(R.color.board_color));
+                ImageButton ib3 = findViewById(R.id.status_redo);
+                ib3.setBackgroundColor(getResources().getColor(R.color.board_color));
+                ImageButton ib4 = findViewById(R.id.status_rotate);
+                ib4.setBackgroundColor(getResources().getColor(R.color.board_color));
+            }
+        }
+        if (settingsProvider.getSettingBackgroundColor() == BACKGROUND_COLOR_ORANGE) {
+            GuessMoveModeManager.GlobalVars.BackgroundColor = 2;
+            if (DroidZebraActivityIsOn == 1) {
+                if (actionBar != null) {
+                    actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.orange)));
+                }
+                FrameLayout fl = findViewById(R.id.board_info_layout);
+                fl.setBackgroundColor(getResources().getColor(R.color.orange));
+                ConstraintLayout cl = findViewById(R.id.layout_status);
+                cl.setBackgroundColor(getResources().getColor(R.color.orange));
+                ImageButton ib1 = findViewById(R.id.status_first_move);
+                ib1.setBackgroundColor(getResources().getColor(R.color.orange));
+                ImageButton ib2 = findViewById(R.id.status_undo);
+                ib2.setBackgroundColor(getResources().getColor(R.color.orange));
+                ImageButton ib3 = findViewById(R.id.status_redo);
+                ib3.setBackgroundColor(getResources().getColor(R.color.orange));
+                ImageButton ib4 = findViewById(R.id.status_rotate);
+                ib4.setBackgroundColor(getResources().getColor(R.color.orange));
+            }
+        }
+    }
+
     @Override
     public void onSettingsChanged() {
         loadUISettings();
         loadEngineSettings();
+
+        Log.d("SYM777_DEBUG:", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Изменение настроек");
+        Log.d("SYM777_DEBUG:", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SettingBackgroundColor (onSettingsChanged) = " + settingsProvider.getSettingBackgroundColor());
+
+        changeBackgroundColor();
     }
 
     @Override
@@ -690,7 +826,9 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
         String scoreText;
         if (sideToMove == ZebraEngine.PLAYER_BLACK) {
             //with dot before
-            scoreText = String.format(Locale.getDefault(), "•%d", state.getBlackScore());
+//            scoreText = String.format(Locale.getDefault(), "•%d", state.getBlackScore());
+//            scoreText = String.format(Locale.getDefault(), "\u25CF %d", state.getBlackScore());
+            scoreText = String.format(Locale.getDefault(), "\u2B24 %d", state.getBlackScore());
         } else {
             scoreText = String.format(Locale.getDefault(), "%d", state.getBlackScore());
         }
@@ -699,7 +837,9 @@ public class DroidZebra extends AppCompatActivity implements MoveStringConsumer,
 
         if (sideToMove == ZebraEngine.PLAYER_WHITE) {
             //with dot behind
-            scoreText = String.format(Locale.getDefault(), "%d•", state.getWhiteScore());
+//            scoreText = String.format(Locale.getDefault(), "%d•", state.getWhiteScore());
+//            scoreText = String.format(Locale.getDefault(), "%d \u25CF", state.getWhiteScore());
+            scoreText = String.format(Locale.getDefault(), "%d \u2B24", state.getWhiteScore());
         } else {
             scoreText = String.format(Locale.getDefault(), "%d", state.getWhiteScore());
         }
